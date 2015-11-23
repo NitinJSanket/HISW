@@ -15,16 +15,16 @@ function [vModels,vTrainAccuracy,vTestAccuracy] = ...
 %%
 [iNumSamples, iNumFeatures] = size(mTrainData);
 
-cvPartition = cvpartition(iNumSamples,'KFold',iKFolds );
-oModels = fitcsvm(mTrainData,vTrainLabels, 'CVPartition', cvPartition);
+oCVPartition = cvpartition(iNumSamples,'KFold',iKFolds );
+oModels = fitcsvm(mTrainData,vTrainLabels, 'CVPartition', oCVPartition);
 
 vModels = oModels.Trained;
 vTrainAccuracy = zeros(iKFolds,1);
 vTestAccuracy = zeros(iKFolds,1);
 
 for iter = 1:iKFolds
-    trainIndices = training(cvPartition,iter);
-    testIndices = test(cvPartition,iter);
+    trainIndices = training(oCVPartition,iter);
+    testIndices = test(oCVPartition,iter);
     
     iNumTrainIndices = length(find(trainIndices));
     vPredictions = predict(vModels{iter},mTrainData(trainIndices,:));
