@@ -1,0 +1,33 @@
+function [vModels,mPredictions,vTrainAccuracy,vTestAc] = ...
+                createCVModels(mTrainData, mTrainLabels, iKFolds)
+%% 
+% INPUT
+% Training Data, Testing Data and K-folds required
+
+% OUTPUT - This function returns 3 vectors and 1 matrix: 
+% A vector of K-models, 
+% A matrix of Predictions (each Column is for a model), 
+% A vector of K-corresponding training errors,
+% A vector of K-corresponding test errors.
+
+% You can call this function and then figure out how to vote for the best
+% model using the available outputs
+
+%%
+[iNumSamples, iNumFeatures] = size(mTrainData);
+
+cvPartition = cvpartition(iNumSamples,'KFold',iKFolds );
+oModels = fitcsvm(mWordsTrainPCA,vGendersTrain, 'CVPartition', cvPartition);
+
+vModels = oModels.Trained;
+for iter = 1:iKFolds
+    trainIndices = training(cvPartition,iter);
+    testIndices = test(cvPartition,iter);
+    
+    mPredictions(iter) = predict(vModels{iter},mTrainData(trainIndices,:));
+    iTrainError = sum(mPredictions(iter) == vGendersTrain(trainIndices))/length(find(trainIndices));
+
+    vPredictedTest= predict(oSVMModel,mWordsTrainPCA(testIndices,:));
+    iTestError = sum(vPredictedTest ~= vGendersTrain(testIndices))/length(find(testIndices));
+end
+
