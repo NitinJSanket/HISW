@@ -1,0 +1,40 @@
+clc
+clear all
+close all
+
+
+%% Read Everything
+TrainImgs = csvread([pwd, '/train/images_train.txt']);
+TrainLabels = csvread([pwd, '/train/genders_train.txt']);
+TrainWords = csvread([pwd, '/train/words_train.txt']);
+TrainImgFeatures = csvread([pwd, '/train/image_features_train.txt']);
+
+%% Split into CV Training and Testing Sets
+NTest = 1000;
+NTrain = length(TrainLabels)-NTest;
+CVTrainImgs = TrainImgs(1:NTrain,:);
+CVTestImgs = TrainImgs(NTrain+1:end, :);
+
+CVTrainLabels = TrainLabels(1:NTrain,:);
+CVTestLabels = TrainLabels(NTrain+1:end, :);
+
+CVTrainWords = TrainWords(1:NTrain,:);
+CVTestWords = TrainWords(NTrain+1:end, :);
+
+CVTrainImgFeatures = TrainImgFeatures(1:NTrain,:);
+CVTestImgFeatures = TrainImgFeatures(NTrain+1:end, :);
+
+%% CV Training
+opts= struct;
+opts.depth= 9;
+opts.numTrees= 100;
+opts.numSplits= 5;
+opts.verbose= true;
+opts.classifierID= 2; % weak learners to use. Can be an array for mix of weak learners too
+
+RFModel = forestTrain(CVTrainWords, CVTrainLabels, opts);
+
+%% CV Testing
+
+%% Display Accuracy
+disp(sum(PredLabels==CVTestLabels)/NTest);
