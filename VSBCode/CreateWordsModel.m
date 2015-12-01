@@ -14,7 +14,7 @@
 %% Loading Dataset
 close all;
 clear all;
-load 'WordsData.m';
+load 'WordsData.mat';
 
 
 %% Setting up data; (1) and (2) above
@@ -56,7 +56,7 @@ mWordsTestPCA = mScore(iNumTrainRows+1:end,1:iMinPCs);
 %                       'KernelScale','auto');
 % iSVMModelTestError = kfoldLoss(oSVMModelCV);
 
-%% SVM Classification Model With PCA and single Held-Out Dataset
+%% SVM Classification Model Without PCA and single Held-Out Dataset
 oSVMModelCV = fitcsvm(mWordsTrainPCA,vGendersTrain, 'KernelFunction', 'gaussian', 'Holdout', 0.1);
 vSVMModelTrainPredicted = kfoldPredict(oSVMModelCV);
 iSVMModelTestError = kfoldLoss(oSVMModelCV);

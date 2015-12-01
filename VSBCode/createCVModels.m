@@ -15,13 +15,17 @@ function [vModels,vTrainAccuracy,vTestAccuracy] = ...
 %%
 [iNumSamples, iNumFeatures] = size(mTrainData);
 
-oCVPartition = cvpartition(iNumSamples,'KFold',iKFolds );
-oModels = fitcsvm(mTrainData,vTrainLabels, 'CVPartition', oCVPartition);
+oCVPartition = cvpartition(iNumSamples,'Holdout',iKFolds );
+%oModels = fitcsvm(mTrainData,vTrainLabels, 'CVPartition', oCVPartition);
+oModels = fitensemble(mTrainData,vTrainLabels,'AdaBoostM1',1000,'Tree','KFold', 2);
+
+if iKFolds < 1
+    iKFolds = 1;
+end
 
 vModels = oModels.Trained;
 vTrainAccuracy = zeros(iKFolds,1);
-vTestAccuracy = zeros(iKFolds,1);
-
+vTestAccuracy = zeros(iKFolds,1)
 for iter = 1:iKFolds
     trainIndices = training(oCVPartition,iter);
     testIndices = test(oCVPartition,iter);
