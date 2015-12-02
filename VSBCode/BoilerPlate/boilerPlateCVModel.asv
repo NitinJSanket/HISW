@@ -1,0 +1,55 @@
+%% Boiler Plate Code for Final Stretch
+trainX = mWordsTrain;
+imgFX = mImageFeaturesTrain;
+trainY = vGendersTrain;
+rankedX = mRankedFeatures;
+actualWords = mWordsActual;
+    
+%% Feature Selection/Reduction/Normalization/Standardization
+
+% you can use following functions - 
+% standardizeFeatures,
+% freqRelFeatures, 
+% stemFeatures, 
+% stemFeaturesWithRanking
+% example: finalTrainX = stemWordsWithRanking(actualWords, trainX, rankedX, 3000);
+allTrainX{1} = rank(trainX,rankedX,1000);
+allTrainX{2} = normFeatures(rank(trainX,rankedX,1000));
+allTrainX{3} = standardizeFeatures(rank(trainX,rankedX,1000));
+allTrainX{4} = standardizeFeatures(normFeatures(rank(trainX,rankedX,1000)));
+allTrainX{5} = stemFeaturesWithRanking(trainX,rankedX,1000);
+allTrainX{6} = normFeatures(stemFeaturesWithRanking(trainX,rankedX,1000));
+allTrainX{7} = standardizeFeatures(stemFeaturesWithRanking(trainX,rankedX,1000));
+allTrainX{8} = standardizeFeatures(normFeatures(stemFeaturesWithRanking(trainX,rankedX,1000)));
+allTrainX{9} = [rank(trainX,rankedX,1000),imgFX];
+allTrainX{10} = [normFeatures(rank(trainX,rankedX,1000)),imgFX];
+allTrainX{11} = [standardizeFeatures(rank(trainX,rankedX,1000)),imgFX];
+allTrainX{12} = [standardizeFeatures(normFeatures(rank(actualWords,rankedX,1000))),imgFX];
+allTrainX{13} = [stemFeaturesWithRanking(actualWords,rankedX,1000),imgFX];
+allTrainX{14} = [normFeatures(stemFeaturesWithRanking(actualWords,rankedX,1000)),imgFX];
+allTrainX{15} = [standardizeFeatures(stemFeaturesWithRanking(actualWords,rankedX,1000)),imgFX];
+allTrainX{16} = [standardizeFeatures(normFeatures(stemFeaturesWithRanking(actualWords,rankedX,1000))),imgFX];
+
+selTrainY = trainY;
+trainAcc = zeros(size(allTrainX,1),1);
+testAcc = zeros(size(allTrainX,1),1);
+for iter = 1:size(allTrainX,1)
+    selTrainX = allTrainX{iter};
+    
+    %Stratified CVPartition
+    cvPartition = cvpartition(trainY,'Holdout',.20);
+    heldInIndices = training(cvPartition,1);
+    heldOutIndices = test(cvPartition,1);
+
+    heldInX = selTrainX(heldInIndices,:);
+    heldInY = selTrainY(heldInIndices,:);
+
+    heldOutX = selTrainX(heldOutIndices,:);
+    heldOutY = selTrainY(heldOutIndices,:);
+
+    model = fitensemble(heldInX,heldInY,...
+                 'RobustBoost',2000,'Tree', 'nprint', 100);
+    
+    trainAcc(iter)  = mean(predict(model,heldInX)==heldInY);
+    testAcc(iter)  = mean(predict(model,heldOutX)==heldOutY);
+end
